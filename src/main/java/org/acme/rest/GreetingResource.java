@@ -6,10 +6,13 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.acme.rest.json.Greeting;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.info.License;
+
+import java.time.LocalDateTime;
 
 @Path("/greeting")
 @Slf4j
@@ -26,6 +29,11 @@ public class GreetingResource {
     public Response hello() {
         log.info("GreetingResource :: hello");
 
-        return Response.ok("Hello from Quarkus REST - " + appVersion).build();
+        Greeting value = Greeting.builder()
+                .value("Hello from Quarkus REST - " + appVersion)
+                .date(LocalDateTime.now())
+                .build();
+
+        return Response.ok(value).build();
     }
 }

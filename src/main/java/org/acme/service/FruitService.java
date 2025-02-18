@@ -40,7 +40,6 @@ public class FruitService {
     public void create(Fruit fruit) {
         try {
             fruitRepository.persist(FruitEntity.builder()
-                .id(fruit.getId())
                 .description(fruit.getDescription())
                 .name(fruit.getName())
                 .build());

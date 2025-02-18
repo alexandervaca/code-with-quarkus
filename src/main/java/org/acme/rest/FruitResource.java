@@ -2,6 +2,7 @@ package org.acme.rest;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.acme.rest.json.Fruit;
@@ -11,8 +12,6 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
 import org.eclipse.microprofile.openapi.annotations.info.License;
 
 import java.util.*;
-
-import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/fruits")
 @Slf4j
@@ -24,39 +23,37 @@ public class FruitResource {
     @Inject
     FruitService fruitService;
 
-    private Set<Fruit> fruits = Collections.newSetFromMap(Collections.synchronizedMap(new LinkedHashMap<>()));
-
-    public FruitResource() {
-        fruits.add(new Fruit(1L, "Apple", "Winter fruit"));
-        fruits.add(new Fruit(2L, "Pineapple", "Tropical fruit"));
-    }
-
     @GET
-    @Produces(APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response list() {
         List<Fruit> fruitList = fruitService.findAll();
         return Response.ok(fruitList).build();
     }
 
     @GET
-    @Produces(APPLICATION_JSON)
-    public Response listByName(String name) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{name}")
+    public Response listByName(@PathParam("name") String name) {
         List<Fruit> fruitList = fruitService.findByName(name);
         return Response.ok(fruitList).build();
     }
 
     @GET
     @Path("/{id}")
-    @Produces(APPLICATION_JSON)
-    public Response get(Long id) {
-        var fruit = fruits.stream().filter(
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response get(@PathParam("id") Long id) {
+        var fruit = fruitService.findAll().stream().filter(
             existingFruit -> Objects.equals(existingFruit.getId(), id));
 
         return Response.ok(fruit).build();
     }
 
     @POST
-    @Consumes(APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response create(Fruit fruit) {
         fruitService.create(fruit);
         return Response.ok().build();
@@ -64,8 +61,10 @@ public class FruitResource {
 
     @DELETE
     @Path("/{id}")
-    public Response delete(Long id) {
-        fruits.removeIf(existingFruit -> existingFruit.getId().equals(id));
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response delete(@PathParam("id") Long id) {
+        var fruits = fruitService.findAll().removeIf(existingFruit -> existingFruit.getId().equals(id));
         return Response.ok(fruits).build();
     }
 
